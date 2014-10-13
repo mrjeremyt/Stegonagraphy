@@ -8,7 +8,7 @@ public class Stego {
 	public static void main(String[] args) {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("inputImage.bmp"));
+            img = ImageIO.read(new File(args[0]));
         } catch (IOException e) {
 
         }
