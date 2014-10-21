@@ -48,10 +48,10 @@ public class Stegonography {
                 int g = (pixel >> 8) & 0xFF;
                 int b = pixel & 0xFF;
                 System.out.println(alpha + " " + r + " " + g + " " + b);
-
+                amountPixel++;
         	}
         }
-        
+        System.out.println("Full number of pixels: " + amountPixel);
         
         
 	// This prints the image height and width and a specific pixel. 
