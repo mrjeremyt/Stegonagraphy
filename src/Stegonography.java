@@ -36,16 +36,26 @@ public class Stegonography {
 
         int amountPixel = 0;
 
-        int pixel = img.getRGB(30, 30);
-        int alpha = (pixel >> 24) & 0xFF;
-        int r = (pixel >> 16) & 0xFF;
-        int g = (pixel >> 8) & 0xFF;
-        int b = pixel & 0xFF;
+        System.out.println(height  + "  " +  width + " " + img.getRGB(30, 30));
+
+        
+        for(int i = 0; i < width; i++){
+        	for(int j = 0; j < height; j++){
+//        		System.out.println("i: " + i + ", j: " + j);
+        		int pixel = img.getRGB(i, j);
+                int alpha = (pixel >> 24) & 0xFF;
+                int r = (pixel >> 16) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int b = pixel & 0xFF;
+                System.out.println(alpha + " " + r + " " + g + " " + b);
+
+        	}
+        }
+        
+        
         
 	// This prints the image height and width and a specific pixel. 
 
-        System.out.println(height  + "  " +  width + " " + img.getRGB(30, 30));
-        System.out.println(alpha + " " + r + " " + g + " " + b);
 	}
 
 }
