@@ -3,7 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class Stego {
+public class Stegonography {
 
 	public static void main(String[] args) {
         BufferedImage img = null;
