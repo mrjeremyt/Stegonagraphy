@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 
 public class Stegonography {
 
@@ -23,6 +24,10 @@ public class Stegonography {
         	System.out.println("Invalid image file");
         }
         
+        BufferedImage x = ImageIO.write(img, formatName, output);
+        
+        ImageOutputStream ios = img.;
+        
         Path path = Paths.get(args[2]);
         
 		//read the entire file into this byte array
@@ -31,8 +36,9 @@ public class Stegonography {
 		//create a stream on the array
 		ByteArrayInputStream is = new ByteArrayInputStream(data);
         
-		File f = path.toFile();
-		System.out.println(path.toString());
+		String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
+		String out_img_name = img_info[0] + "-steg." + img_info[1]; 
+		System.out.println(out_img_name);
 		
 		
         int height = img.getHeight();
@@ -43,19 +49,18 @@ public class Stegonography {
         System.out.println(height  + "  " +  width + " " + img.getRGB(30, 30));
 
         
-//        for(int i = 0; i < width; i++){
-//        	for(int j = 0; j < height; j++){
-////        		System.out.println("i: " + i + ", j: " + j);
-//        		int pixel = img.getRGB(i, j);
-//                int alpha = (pixel >> 24) & 0xFF;
-//                int r = (pixel >> 16) & 0xFF;
-//                int g = (pixel >> 8) & 0xFF;
-//                int b = pixel & 0xFF;
-//                System.out.println(alpha + " " + r + " " + g + " " + b);
-//                amountPixel++;
-//        	}
-//        }
-        System.out.println("Full number of pixels: " + amountPixel);
+/*        for(int i = 0; i < width; i++){
+        	for(int j = 0; j < height; j++){
+        		int pixel = img.getRGB(i, j);
+                int alpha = (pixel >> 24) & 0xFF;
+                int r = (pixel >> 16) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int b = pixel & 0xFF;
+                System.out.println(alpha + " " + r + " " + g + " " + b);
+                amountPixel++;
+        	}
+        }
+        System.out.println("Full number of pixels: " + amountPixel);*/
         
         
 	// This prints the image height and width and a specific pixel. 
