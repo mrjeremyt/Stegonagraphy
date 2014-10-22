@@ -17,17 +17,12 @@ public class Stegonography {
 			enkode = false;
 			
         BufferedImage img = null;
-        
         try {
             img = ImageIO.read(new File(args[1]));
         } catch (IOException e) {
         	System.out.println("Invalid image file");
         }
-        
-        BufferedImage x = ImageIO.write(img, formatName, output);
-        
-        ImageOutputStream ios = img.;
-        
+      
         Path path = Paths.get(args[2]);
         
 		//read the entire file into this byte array
@@ -39,6 +34,11 @@ public class Stegonography {
 		String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
 		String out_img_name = img_info[0] + "-steg." + img_info[1]; 
 		System.out.println(out_img_name);
+		File f = new File(out_img_name);
+		
+		BufferedImage temp = img;
+		
+        boolean x = ImageIO.write(temp, img_info[1].toString(), f);       
 		
 		
         int height = img.getHeight();
