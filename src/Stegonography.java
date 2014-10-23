@@ -25,14 +25,30 @@ public class Stegonography {
         } catch (IOException e) {
         	System.out.println("Invalid image file");
         }
-        Path path = Paths.get(args[2]);
+        Path msg_path = Paths.get(args[2]);
         
 		//read the entire file into this byte array
-		byte [] data = Files.readAllBytes(path);
+		byte [] data = Files.readAllBytes(msg_path);
 
 		//create a stream on the array
 		ByteArrayInputStream is = new ByteArrayInputStream(data);
-		System.out.println(is.available());
+
+		
+		
+		
+		File f = null;
+		String img_info[] = null;
+		
+		if(enkode){
+			img_info = Paths.get(args[1]).getFileName().toString().split("\\.");
+			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
+			f = new File(out_img_name);
+		}else{
+			
+		}
+		
+		
+		
         
 		String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
 		String out_img_name = img_info[0] + "-steg." + img_info[1]; 
