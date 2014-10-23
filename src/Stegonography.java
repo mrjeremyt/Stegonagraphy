@@ -61,22 +61,63 @@ public class Stegonography {
 			LinkedList<Byte> the_bits = full_of_byte(is);
 			Iterator<Byte> it = the_bits.iterator();
 			boolean do_one_more = false;
+			
+			outerloop:
 	        for(int i = 0; i < width; i++){
 	        	for(int j = 0; j < height; j++){
+	        		int pixel = img.getRGB(i, j);
+	                int alpha = (pixel >> 24) & 0xFF;
+	                int r = (pixel >> 16) & 0xFF;
+	                int g = (pixel >> 8) & 0xFF;
+	                int b = pixel & 0xFF;
+	                
 	        		if(it.hasNext()){
-		        		int pixel = img.getRGB(i, j);
-		                int alpha = (pixel >> 24) & 0xFF;
-		                int r = (pixel >> 16) & 0xFF;
-		                int g = (pixel >> 8) & 0xFF;
-		                int b = pixel & 0xFF;
 		                int newrgb = newrgb(alpha, r, g, b, it.next());
 		                temp.setRGB(i, j, newrgb);
 	        		}else{
 	        			if(do_one_more){
-	        				//insert EOF part 2
-	        				//exit loop
+	        				if(((byte)alpha % 2) != 0){
+	        					if(alpha == 0) alpha+=1;
+	        					else	alpha-=1;
+	        				}
+	        					
+	        				if((byte)(r % 2) != 0){
+	        					if(r == 0)	r+=1;
+	        					else r-=1;
+	        				}
+	        					
+	        				if((byte)(g % 2) != 0){
+	        					if(g == 0) 	g+=1;
+	        					else	g-=1;
+	        				}
+	        						
+	        				if((byte)(b % 2) != 0){
+	        					if(b == 0) 	b+=1;
+	        					else b-=1;
+	        				}
+	        				
+	        				break outerloop;
 	        			}else{
-	        				//insert EOF part 1
+	        				if(((byte)alpha % 2) != 0){
+	        					if(alpha == 0) alpha+=1;
+	        					else	alpha-=1;
+	        				}
+	        					
+	        				if((byte)(r % 2) != 0){
+	        					if(r == 0)	r+=1;
+	        					else r-=1;
+	        				}
+	        					
+	        				if((byte)(g % 2) != 0){
+	        					if(g == 0) 	g+=1;
+	        					else	g-=1;
+	        				}
+	        						
+	        				if((byte)(b % 2) != 0){
+	        					if(b == 0) 	b+=1;
+	        					else b-=1;
+	        				}
+	        				
 	        				do_one_more = true;
 	        			}
 	        			
@@ -84,6 +125,7 @@ public class Stegonography {
 
 	        	}
 	        }
+	        
         	
 			
 			
@@ -158,6 +200,32 @@ public class Stegonography {
 	}
 	
 	private static int newrgb(int alpha, int r, int g, int b, Byte by){
+		byte one = (byte) ((by.byteValue() >> 3) & 0x1);
+		byte two= (byte) ((by.byteValue() >> 2) & 0x1);
+		byte three = (byte) ((by.byteValue() >> 1) & 0x1);
+		byte four = (byte) ((by.byteValue() >> 0) & 0x1);
+		
+		if(((byte)alpha % 2) != one){
+			if(alpha == 0) alpha+=1;
+			else	alpha-=1;
+		}
+			
+		if((byte)(r % 2) != two){
+			if(r == 0)	r+=1;
+			else r-=1;
+		}
+			
+		if((byte)(g % 2) != three){
+			if(g == 0) 	g+=1;
+			else	g-=1;
+		}
+				
+		if((byte)(b % 2) != four){
+			if(b == 0) 	b+=1;
+			else b-=1;
+		}
+		
+		
 		int newrgb = 0;
 		newrgb = (b | newrgb);
 		newrgb = (g << 8) | newrgb;
