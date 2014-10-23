@@ -1,14 +1,14 @@
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 
 public class Stegonography {
 	
@@ -20,26 +20,56 @@ public class Stegonography {
 	
 	public static void main(String[] args) throws IOException 
 	{
+		//determines if the program needs to enkode or dekode
 		Boolean enkode = true;
 		if(!args[0].substring(1).toLowerCase().equals("e"))
 			enkode = false;
 			
+		//reads in the image file 
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File(args[1]));
+            height = img.getHeight();
+            width = img.getWidth();
         } catch (IOException e) {
         	System.out.println("Invalid image file");
+        	System.exit(-1);
         }
-        Path msg_path = Paths.get(args[2]);
         
+              
 		//read the entire file into this byte array
-		byte [] data = Files.readAllBytes(msg_path);
+		byte [] data = Files.readAllBytes(Paths.get(args[2]));
 
 		//create a stream on the array
 		ByteArrayInputStream is = new ByteArrayInputStream(data);
 
+
+		//prints the image statistics no matter whether enkode or dekode
+        System.out.println("Input image file: " + Paths.get(args[1]).getFileName().toString() + 
+        		", number of pixels: " + (height * width) + ", height: " + height  + ", width: " +  width + ".");
+        
+        //switches based on enkode or dekode
+		if(enkode){
+			String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
+			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
+			File output_file = new File(out_img_name);
+			
+			
+			BufferedImage temp = img;
+			
+	        ImageIO.write(temp, img_info[1].toString(), output_file);     
+	        
+			
+		}else{
+			File output_file = new File(Paths.get(args[2]).getFileName().toString());
+			
+			
+		}
+		
+  
 		int test_byte = 0;
 		int [] threebits = {0,0,0};
+		LinkedList<Byte> the_bits = new LinkedList<Byte>();
 		ArrayList<Integer> my_bits = new ArrayList<Integer>();
 		int number_of_bytes = is.available();
 		
@@ -48,30 +78,9 @@ public class Stegonography {
 			fill_array(my_bits, test_byte);
 			System.out.println(my_bits.size());
 		}
-		
-		File f = null;
-		String img_info[] = null;
-		
-		if(enkode){
-			img_info = Paths.get(args[1]).getFileName().toString().split("\\.");
-			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
-			f = new File(out_img_name);
-		}else{
-			
-		}
-		
-		BufferedImage temp = img;
-		
-        boolean x = ImageIO.write(temp, img_info[1].toString(), f);       
-		
-        height = img.getHeight();
-        width = img.getWidth();
 
-        int amountPixel = 0;
 
-        System.out.println(height  + "  " +  width + " " + img.getRGB(30, 30));
-
-        
+       
         for(int i = 0; i < width; i++){
         	for(int j = 0; j < height; j++){
         		int pixel = img.getRGB(i, j);
@@ -80,18 +89,40 @@ public class Stegonography {
                 int g = (pixel >> 8) & 0xFF;
                 int b = pixel & 0xFF;
                 System.out.println(alpha + " " + r + " " + g + " " + b);
-                amountPixel++;
         	}
         }
-        System.out.println("Full number of pixels: " + amountPixel);
         
         
-	// This prints the image height and width and a specific pixel. 
 
 	}
 	
+	
+	/*
+	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!maybe wrong
+	 */
 	private static boolean enough_bits (ByteArrayInputStream is)
 	{		return (is.available() < ((height * width * 3) / (8 * 1024)));  	}  // Abandon all hope, ye who try to understand this code.
+	
+	
+	private static LinkedList<Byte> full_of_byte(ByteArrayInputStream is){
+		LinkedList<Byte> x = new LinkedList<Byte>();
+		int current_byte = 0;
+		int numbits = 0;
+		int buffer = 0;
+		
+		while(current_byte != -1){
+			if (numbits >= 3) {
+				x.add((byte)(buffer & 0x7));
+				buffer >>= 3;
+			}else{
+				
+			}
+		}
+		
+		
+		
+		return x;	
+	}
 	
 	private static ArrayList<Integer> fill_array (ArrayList<Integer> bytes, int test_byte) throws IOException
 	{
@@ -100,7 +131,7 @@ public class Stegonography {
 		test_byte >>= 3;
 		((Appendable) bytes).append((char) (test_byte & 0x7));
 		test_byte >>= 3;
-		((Appendable) bytes).append((char) (test_byte & 0x7));
+		( (Appendable) bytes).append((char) (test_byte & 0x7));
 //		for (int e : bytes)
 //			System.out.print(e);
 //		System.out.println();
