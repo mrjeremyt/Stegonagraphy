@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -48,20 +49,44 @@ public class Stegonography {
         System.out.println("Input image file: " + Paths.get(args[1]).getFileName().toString() + 
         		", number of pixels: " + (height * width) + ", height: " + height  + ", width: " +  width + ".");
         
+        BufferedImage temp = img;
         //switches based on enkode or dekode
 		if(enkode){
 			String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
 			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
-			File output_file = new File(out_img_name);
+//			File output_file = new File(out_img_name);
+			
+			temp = img;
+			
+			Random ran = new Random();
+	        for(int i = 0; i < width; i++){
+	        	for(int j = 0; j < height; j++){
+	        		int pixel = img.getRGB(i, j);
+	                int alpha = (pixel >> 24) & 0xFF;
+	                int r = (pixel >> 16) & 0xFF;
+	                int g = (pixel >> 8) & 0xFF;
+	                int b = pixel & 0xFF;
+	                alpha = ran.nextInt(256);
+//	                r += 100;
+	                int newrgb = 0;
+	                newrgb = (b | newrgb);
+	                newrgb = (g << 8) | newrgb;
+	                newrgb = (r << 16) | newrgb;
+	                newrgb = (alpha << 24) | newrgb;
+	                System.out.println(alpha + " " + r + " " + g + " " + b);
+//	                img.setRGB(i, j, newrgb);
+//	                System.out.println("New Rgb is: " + ((newrgb >> 24) & 0xFF)  + " " + ((newrgb >> 16) & 0xFF) + " " + g + " " + b);
+	        	}
+	        }
 			
 			
-			BufferedImage temp = img;
 			
-	        ImageIO.write(temp, img_info[1].toString(), output_file);     
+			
+//	        ImageIO.write(temp, img_info[1].toString(), output_file);     
 	        
 			
 		}else{
-			File output_file = new File(Paths.get(args[2]).getFileName().toString());
+//			File output_file = new File(Paths.get(args[2]).getFileName().toString());
 			
 			
 		}
@@ -81,16 +106,7 @@ public class Stegonography {
 
 
        
-        for(int i = 0; i < width; i++){
-        	for(int j = 0; j < height; j++){
-        		int pixel = img.getRGB(i, j);
-                int alpha = (pixel >> 24) & 0xFF;
-                int r = (pixel >> 16) & 0xFF;
-                int g = (pixel >> 8) & 0xFF;
-                int b = pixel & 0xFF;
-                System.out.println(alpha + " " + r + " " + g + " " + b);
-        	}
-        }
+
         
         
 
@@ -127,14 +143,11 @@ public class Stegonography {
 	private static ArrayList<Integer> fill_array (ArrayList<Integer> bytes, int test_byte) throws IOException
 	{
 		System.out.println("Test byte: " + test_byte);
-		((Appendable) bytes).append((char) (test_byte & 0x7));
+		bytes.add((test_byte & 0x7));
 		test_byte >>= 3;
-		((Appendable) bytes).append((char) (test_byte & 0x7));
+		bytes.add((test_byte & 0x7));
 		test_byte >>= 3;
-		( (Appendable) bytes).append((char) (test_byte & 0x7));
-//		for (int e : bytes)
-//			System.out.print(e);
-//		System.out.println();
+		bytes.add((test_byte & 0x7));
 		return bytes;
 	}
 	
@@ -149,6 +162,7 @@ public class Stegonography {
 	
 	//The below code is horrible, and I feel ashamed I wrote it...
 	//you should be ashamed. This is sheet
+	//I am ashamed...
 	private static int get_3bits (ByteArrayInputStream is)
 	{
 		int newbit = 0;
