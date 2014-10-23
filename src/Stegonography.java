@@ -21,7 +21,7 @@ public class Stegonography {
 	public static void main(String[] args) throws IOException 
 	{
 		Boolean enkode = true;
-		if(!args[0].substring(1).equals("E"))
+		if(!args[0].substring(1).toLowerCase().equals("e"))
 			enkode = false;
 			
         BufferedImage img = null;
@@ -117,6 +117,7 @@ public class Stegonography {
 	}
 	
 	//The below code is horrible, and I feel ashamed I wrote it...
+	//you should be ashamed. This is sheet
 	private static int get_3bits (ByteArrayInputStream is)
 	{
 		int newbit = 0;
