@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -39,11 +40,13 @@ public class Stegonography {
 
 		int test_byte = 0;
 		int [] threebits = {0,0,0};
+		ArrayList<Integer> my_bits = new ArrayList<Integer>();
+		int number_of_bytes = is.available();
 		
 		while ((test_byte = is.read()) != -1)
 		{
-			fill_array(threebits, test_byte);
-			System.out.println(recon_char(threebits));
+			fill_array(my_bits, test_byte);
+			System.out.println(my_bits.size());
 		}
 		
 		File f = null;
@@ -61,7 +64,6 @@ public class Stegonography {
 		
         boolean x = ImageIO.write(temp, img_info[1].toString(), f);       
 		
-		
         height = img.getHeight();
         width = img.getWidth();
 
@@ -70,37 +72,35 @@ public class Stegonography {
         System.out.println(height  + "  " +  width + " " + img.getRGB(30, 30));
 
         
-//        for(int i = 0; i < width; i++){
-//        	for(int j = 0; j < height; j++){
-//        		int pixel = img.getRGB(i, j);
-//                int alpha = (pixel >> 24) & 0xFF;
-//                int r = (pixel >> 16) & 0xFF;
-//                int g = (pixel >> 8) & 0xFF;
-//                int b = pixel & 0xFF;
-//                System.out.println(alpha + " " + r + " " + g + " " + b);
-//                amountPixel++;
-//        	}
-//        }
-//        System.out.println("Full number of pixels: " + amountPixel);
+        for(int i = 0; i < width; i++){
+        	for(int j = 0; j < height; j++){
+        		int pixel = img.getRGB(i, j);
+                int alpha = (pixel >> 24) & 0xFF;
+                int r = (pixel >> 16) & 0xFF;
+                int g = (pixel >> 8) & 0xFF;
+                int b = pixel & 0xFF;
+                System.out.println(alpha + " " + r + " " + g + " " + b);
+                amountPixel++;
+        	}
+        }
+        System.out.println("Full number of pixels: " + amountPixel);
         
         
 	// This prints the image height and width and a specific pixel. 
 
 	}
 	
-	
-
 	private static boolean enough_bits (ByteArrayInputStream is)
 	{		return (is.available() < ((height * width * 3) / (8 * 1024)));  	}  // Abandon all hope, ye who try to understand this code.
 	
-	private static int [] fill_array (int [] bytes, int test_byte)
+	private static ArrayList<Integer> fill_array (ArrayList<Integer> bytes, int test_byte) throws IOException
 	{
 		System.out.println("Test byte: " + test_byte);
-		bytes[0] = test_byte & 0x7;
+		((Appendable) bytes).append((char) (test_byte & 0x7));
 		test_byte >>= 3;
-		bytes[1] = test_byte & 0x7;
+		((Appendable) bytes).append((char) (test_byte & 0x7));
 		test_byte >>= 3;
-		bytes[2] = test_byte & 0x7;
+		((Appendable) bytes).append((char) (test_byte & 0x7));
 //		for (int e : bytes)
 //			System.out.print(e);
 //		System.out.println();
