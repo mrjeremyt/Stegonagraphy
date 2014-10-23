@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -58,15 +59,29 @@ public class Stegonography {
 			BufferedImage temp = img;
 			
 			LinkedList<Byte> the_bits = full_of_byte(is);
-			
+			Iterator<Byte> it = the_bits.iterator();
+			boolean do_one_more = false;
 	        for(int i = 0; i < width; i++){
 	        	for(int j = 0; j < height; j++){
-	        		int pixel = img.getRGB(i, j);
-	                int alpha = (pixel >> 24) & 0xFF;
-	                int r = (pixel >> 16) & 0xFF;
-	                int g = (pixel >> 8) & 0xFF;
-	                int b = pixel & 0xFF;
-	                
+	        		if(it.hasNext()){
+		        		int pixel = img.getRGB(i, j);
+		                int alpha = (pixel >> 24) & 0xFF;
+		                int r = (pixel >> 16) & 0xFF;
+		                int g = (pixel >> 8) & 0xFF;
+		                int b = pixel & 0xFF;
+		                int newrgb = newrgb(alpha, r, g, b, it.next());
+		                temp.setRGB(i, j, newrgb);
+	        		}else{
+	        			if(do_one_more){
+	        				//insert EOF part 2
+	        				//exit loop
+	        			}else{
+	        				//insert EOF part 1
+	        				do_one_more = true;
+	        			}
+	        			
+	        		}
+
 	        	}
 	        }
         	
@@ -141,6 +156,16 @@ public class Stegonography {
 		}
 		return x;	
 	}
+	
+	private static int newrgb(int alpha, int r, int g, int b, Byte by){
+		int newrgb = 0;
+		newrgb = (b | newrgb);
+		newrgb = (g << 8) | newrgb;
+		newrgb = (r << 16) | newrgb;
+		newrgb = (alpha << 24) | newrgb;
+		return newrgb;
+	}
+	
 	
 //	private static ArrayList<Integer> fill_array (ArrayList<Integer> bytes, int test_byte) throws IOException
 //	{
