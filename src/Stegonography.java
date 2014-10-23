@@ -33,9 +33,6 @@ public class Stegonography {
 		//create a stream on the array
 		ByteArrayInputStream is = new ByteArrayInputStream(data);
 
-		
-		
-		
 		File f = null;
 		String img_info[] = null;
 		
@@ -46,14 +43,6 @@ public class Stegonography {
 		}else{
 			
 		}
-		
-		
-		
-        
-		String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
-		String out_img_name = img_info[0] + "-steg." + img_info[1]; 
-		System.out.println(out_img_name);
-		File f = new File(out_img_name);
 		
 		BufferedImage temp = img;
 		
