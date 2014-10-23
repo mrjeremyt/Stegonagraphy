@@ -13,8 +13,12 @@ public class Stegonography {
 	
 	public static int height;
 	public static int width;
+	public static int buffer = 0;
+	public static final byte my_eof = -1; //Indicates stop reading inside of image while decoding.
+	public static int bits_in_buffer = 0;
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException 
+	{
 		Boolean enkode = true;
 		if(!args[0].substring(1).equals("E"))
 			enkode = false;
@@ -33,6 +37,15 @@ public class Stegonography {
 		//create a stream on the array
 		ByteArrayInputStream is = new ByteArrayInputStream(data);
 
+		int test_byte = 0;
+		int [] threebits = {0,0,0};
+		
+		while ((test_byte = is.read()) != -1)
+		{
+			fill_array(threebits, test_byte);
+			System.out.println(recon_char(threebits));
+		}
+		
 		File f = null;
 		String img_info[] = null;
 		
@@ -74,9 +87,65 @@ public class Stegonography {
 	// This prints the image height and width and a specific pixel. 
 
 	}
+	
+	
 
-	private boolean enough_bits ()
+	private static boolean enough_bits (ByteArrayInputStream is)
+	{		return (is.available() < ((height * width * 3) / (8 * 1024)));  	}  // Abandon all hope, ye who try to understand this code.
+	
+	private static int [] fill_array (int [] bytes, int test_byte)
 	{
-		return false;
+		System.out.println("Test byte: " + test_byte);
+		bytes[0] = test_byte & 0x7;
+		test_byte >>= 3;
+		bytes[1] = test_byte & 0x7;
+		test_byte >>= 3;
+		bytes[2] = test_byte & 0x7;
+//		for (int e : bytes)
+//			System.out.print(e);
+//		System.out.println();
+		return bytes;
+	}
+	
+	private static int recon_char (int [] bytes)
+	{
+		int recon = 0;
+		recon |= bytes[0];
+		recon |= bytes[1] << 3;
+		recon |= bytes[2] << 6;
+		return recon;
+	}
+	
+	//The below code is horrible, and I feel ashamed I wrote it...
+	private static int get_3bits (ByteArrayInputStream is)
+	{
+		int newbit = 0;
+		if (bits_in_buffer > 3)
+		{
+			System.out.println("Buffer in bits > 3 begins at: " + buffer);
+			bits_in_buffer -= 3;
+			int threebits = buffer & 0x7;
+			buffer >>= 3;
+			System.out.println("Threebits in bits >3 is: " + threebits);
+			System.out.println("Bits in buffer is: " + bits_in_buffer);
+			return threebits;
+		}
+		else
+		{
+			if ((newbit = is.read()) !=-1)
+			{
+				System.out.println("Newbit is : " + newbit);
+				buffer = (newbit << bits_in_buffer) | buffer;
+				System.out.println("Buffer after insertion is: " + buffer);
+				int threebit = buffer & 0x7;
+				buffer >>= 3;
+				System.out.println("Three bit is : " + threebit);
+				System.out.println("Buffer after threebit removal is: " + buffer);
+				bits_in_buffer += 5;
+				return threebit;
+			}
+			else
+				return my_eof;
+		}
 	}
 }
