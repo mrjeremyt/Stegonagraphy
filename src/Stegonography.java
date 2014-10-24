@@ -2,7 +2,9 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ public class Stegonography {
 	
 	public static int height;
 	public static int width;
-	public static int buffer = 0;
+//	public static int buffer = 0;
 	public static final byte my_eof = -1; //Indicates stop reading inside of image while decoding.
 	public static int bits_in_buffer = 0;
 	
@@ -36,14 +38,8 @@ public class Stegonography {
         } catch (IOException e) {
         	System.out.println("Invalid image file");
         	System.exit(-1);
-        }
-        
+        }    
               
-		//read the entire file into this byte array
-		byte [] data = Files.readAllBytes(Paths.get(args[2]));
-
-		//create a stream on the array
-		ByteArrayInputStream is = new ByteArrayInputStream(data);
 
 
 		//prints the image statistics no matter whether enkode or dekode
@@ -52,6 +48,12 @@ public class Stegonography {
         
         //switches based on enkode or dekode
 		if(enkode){
+			//read the entire file into this byte array
+			byte [] data = Files.readAllBytes(Paths.get(args[2]));
+			
+			//create a stream on the array
+			ByteArrayInputStream is = new ByteArrayInputStream(data);
+			
 			String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
 			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
 			File output_file = new File(out_img_name);
@@ -71,10 +73,16 @@ public class Stegonography {
 	                int g = (pixel >> 8) & 0xFF;
 	                int b = pixel & 0xFF;
 	                
-	        		if(it.hasNext()){
-		                int newrgb = newrgb(alpha, r, g, b, it.next());
+	        		if(it.hasNext())
+	        		{
+	        			print_rgb(pixel, true);
+	        			byte test_byte = it.next();
+	        			System.out.println(Integer.toBinaryString((test_byte & 0xFF) + 0x10).substring(1)); //Converts byte to binary string.
+		                int newrgb = newrgb(alpha, r, g, b, test_byte);
+		                print_rgb(newrgb, false);
 		                temp.setRGB(i, j, newrgb);
-	        		}else{
+	        		}
+	        		else{
 	        			if(do_one_more){
 	        				if(((byte)alpha % 2) != 0){
 	        					if(alpha == 0) alpha+=1;
@@ -125,22 +133,41 @@ public class Stegonography {
 
 	        	}
 	        }
-	        
-        	
-			
-			
-			
-			
+	
 	        ImageIO.write(temp, img_info[1].toString(), output_file);     
-	        
-			
 		}else{
-			File output_file = new File(Paths.get(args[2]).getFileName().toString());
+			File output_file = new File(Paths.get(args[2]).getFileName().toString() + "-out");
+			FileOutputStream fs = new FileOutputStream(output_file);
+			boolean upper = true;
+			Byte buffer = 0;
 			
 			
+			outerloop:
+	        for(int i = 0; i < width; i++){
+	        	for(int j = 0; j < height; j++){
+	        		int pixel = img.getRGB(i, j);
+	                int alpha = (pixel >> 24) & 0xFF;
+	                int r = (pixel >> 16) & 0xFF;
+	                int g = (pixel >> 8) & 0xFF;
+	                int b = pixel & 0xFF;
+	                
+	                if(upper){
+	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);               
+	                	upper = false;
+	                }else{
+	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
+	                	upper = true;
+	                	if(buffer.byteValue() != 0){
+	                		fs.write(new byte[]{buffer.byteValue()});
+	                		buffer = 0;
+//	                		System.out.println(Byte.toString(buffer));
+	                	}else  		break outerloop;
+	                }
+	        	}
+	        }
+	        fs.close();
 		}
-		
-  
+	
 //		int test_byte = 0;
 //		int [] threebits = {0,0,0};
 //		ArrayList<Integer> my_bits = new ArrayList<Integer>();
@@ -179,6 +206,43 @@ public class Stegonography {
 
 	}
 	
+	private static void print_rgb (int rgb, boolean old)
+	{
+		if (old)
+			System.out.println("Old Rgb is: " + ((rgb >> 24) & 0xFF)  + " " + ((rgb >> 16) & 0xFF) + " " + ((rgb >> 8) & 0xFF) + " " + (rgb & 0xFF));
+		else
+			System.out.println("New Rgb is: " + ((rgb >> 24) & 0xFF)  + " " + ((rgb >> 16) & 0xFF) + " " + ((rgb >> 8) & 0xFF) + " " + (rgb & 0xFF));
+	}
+	
+	private static Byte decode_rgb (int alpha, int r, int g, int b, boolean upper, Byte buffer)
+	{
+		if (upper){
+			if ((alpha %2) == 0) 	buffer = (byte) (buffer | (1 << 7));
+			else	buffer = (byte) (buffer | (0 << 7));
+			
+			if ((r %2) == 0) 	buffer = (byte) (buffer | (1 << 6));
+			else	buffer = (byte) (buffer | (0 << 6));
+			
+			if ((g %2) == 0) 	buffer = (byte) (buffer | (1 << 5));
+			else	buffer = (byte) (buffer | (0 << 5));
+			
+			if ((b %2) == 0) 	buffer = (byte) (buffer | (1 << 4));
+			else	buffer = (byte) (buffer | (0 << 4));
+		}else{
+			if ((alpha %2) == 0) 	buffer = (byte) (buffer | (1 << 3));
+			else	buffer = (byte) (buffer | (0 << 3));
+			
+			if ((r %2) == 0) 	buffer = (byte) (buffer | (1 << 2));
+			else	buffer = (byte) (buffer | (0 << 2));
+			
+			if ((g %2) == 0) 	buffer = (byte) (buffer | (1 << 1));
+			else	buffer = (byte) (buffer | (0 << 1));
+			
+			if ((b %2) == 0) 	buffer = (byte) (buffer | (1 << 0));
+			else	buffer = (byte) (buffer | (0 << 0));
+		}
+		return buffer;
+	}
 	
 	/*
 	 * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!maybe wrong
