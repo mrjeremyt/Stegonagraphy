@@ -1,6 +1,8 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +67,8 @@ public class Stegonography {
 			Iterator<Byte> it = the_bits.iterator();
 			boolean do_one_more = false;
 			boolean upper = true;
+			ColorModel cm = img.getColorModel();
+			System.out.println("OMGERZ!");
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
@@ -74,6 +78,7 @@ public class Stegonography {
 	                int r = (pixel >> 16) & 0xFF;
 	                int g = (pixel >> 8) & 0xFF;
 	                int b = pixel & 0xFF;
+	                Color c = new Color(img.getRGB(i, j), true);
 	                
 	        		if(it.hasNext())
 	        		{
@@ -82,6 +87,7 @@ public class Stegonography {
 	        			System.out.println(Integer.toBinaryString((test_byte & 0xFF) + 0x10).substring(1)); //Converts byte to binary string.
 		                int newrgb = newrgb(alpha, r, g, b, test_byte);
 		                print_rgb(newrgb, false);
+		                
 		                temp.setRGB(i, j, newrgb);
 	        		}
 	        		else{
@@ -135,26 +141,39 @@ public class Stegonography {
 
 	        	}
 	        }
-	
+			System.out.println("Wtf is this alpha crap?  Do you even haz one bro? Answer: " + cm.hasAlpha());
 	        ImageIO.write(temp, img_info[1].toString(), output_file);     
 		}else{
 			File output_file = new File(Paths.get(args[2]).getFileName().toString() + "-out");
 			FileOutputStream fs = new FileOutputStream(output_file);
 			boolean upper = true;
 			Byte buffer = 0;
-			ColorModel c = img.getColorModel();
 			
 			
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
 	        	for(int j = 0; j < height; j++){
-	        		int pixel = img.getRGB(i, j, true);
-	        		print_rgb(pixel, true);
+//	        		int pixel = img.getRGB(i, j);
+//	        		print_rgb(pixel, true);
 //	                int alpha = (pixel >> 24) & 0xFF;
 //	                int r = (pixel >> 16) & 0xFF;
 //	                int g = (pixel >> 8) & 0xFF;
 //	                int b = pixel & 0xFF;
+	        		
+	        		WritableRaster raster = null;
+	        		ColorModel colorModel = null;
+
+//	        		Object rgbElem = raster.getDataElements(i, j, null);
+//	        		int alpha = colorModel.getAlpha(rgbElem);
+	        		Color c = new Color(img.getRGB(i, j), true);
+	        		int alpha = (img.getRGB(i, j) & 0xff000000) >>> 24;
+	        		int r = c.getRed();
+	        		int g = c.getGreen();
+	        		int b = c.getBlue();
+	        		System.out.println("Alpha is: " + alpha);
+
+	        		
 	                
 	                if(upper){
 	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
