@@ -67,6 +67,7 @@ public class Stegonography {
 			Iterator<Byte> it = the_bits.iterator();
 			boolean do_one_more = false;
 			boolean upper = true;
+			ColorModel cm = img.getColorModel();
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
@@ -77,7 +78,6 @@ public class Stegonography {
 	                int g = (pixel >> 8) & 0xFF;
 	                int b = pixel & 0xFF;
 	                Color c = new Color(img.getRGB(i, j), true);
-	                
 	                
 	        		if(it.hasNext())
 	        		{
@@ -140,7 +140,7 @@ public class Stegonography {
 
 	        	}
 	        }
-	
+			System.out.println("Wtf is this alpha crap?  Do you even haz one bro? Answer: " + cm.hasAlpha());
 	        ImageIO.write(temp, img_info[1].toString(), output_file);     
 		}else{
 			File output_file = new File(Paths.get(args[2]).getFileName().toString() + "-out");
@@ -264,8 +264,8 @@ public class Stegonography {
 		byte four = (byte) ((by.byteValue() >> 0) & 0x1);
 		
 		if((byte)(alpha % 2) != one){
-			if(alpha == 0) alpha+=1;
-			else	alpha-=1;
+			if(alpha == 0) alpha=0;
+			else	alpha=0;
 		}
 			
 		if((byte)(r % 2) != two){
