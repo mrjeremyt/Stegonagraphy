@@ -63,6 +63,7 @@ public class Stegonography {
 			LinkedList<Byte> the_bits = full_of_byte(is);
 			Iterator<Byte> it = the_bits.iterator();
 			boolean do_one_more = false;
+			boolean upper = true;
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
@@ -146,63 +147,30 @@ public class Stegonography {
 	        for(int i = 0; i < width; i++){
 	        	for(int j = 0; j < height; j++){
 	        		int pixel = img.getRGB(i, j);
+	        		print_rgb(pixel, true);
 	                int alpha = (pixel >> 24) & 0xFF;
 	                int r = (pixel >> 16) & 0xFF;
 	                int g = (pixel >> 8) & 0xFF;
 	                int b = pixel & 0xFF;
 	                
 	                if(upper){
-	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);               
+	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
+	                	System.out.println("Upper buffer: " + buffer);
 	                	upper = false;
 	                }else{
 	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
+	                	System.out.println("Full Buffer: " + buffer);
 	                	upper = true;
 	                	if(buffer.byteValue() != 0){
 	                		fs.write(new byte[]{buffer.byteValue()});
+//	                		System.out.println("Final buffer to write: " + Byte.toString(buffer));
 	                		buffer = 0;
-//	                		System.out.println(Byte.toString(buffer));
 	                	}else  		break outerloop;
 	                }
 	        	}
 	        }
 	        fs.close();
-		}
-	
-//		int test_byte = 0;
-//		int [] threebits = {0,0,0};
-//		ArrayList<Integer> my_bits = new ArrayList<Integer>();
-//		int number_of_bytes = is.available();
-//		
-//		while ((test_byte = is.read()) != -1)
-//		{
-//			fill_array(my_bits, test_byte);
-//			System.out.println(my_bits.size());
-//		}
-
-
-       
-//		Random ran = new Random();
-//        for(int i = 0; i < width; i++){
-//        	for(int j = 0; j < height; j++){
-//        		int pixel = img.getRGB(i, j);
-//                int alpha = (pixel >> 24) & 0xFF;
-//                int r = (pixel >> 16) & 0xFF;
-//                int g = (pixel >> 8) & 0xFF;
-//                int b = pixel & 0xFF;
-//                alpha = ran.nextInt(256);
-////                r += 100;
-//                int newrgb = 0;
-//                newrgb = (b | newrgb);
-//                newrgb = (g << 8) | newrgb;
-//                newrgb = (r << 16) | newrgb;
-//                newrgb = (alpha << 24) | newrgb;
-//                System.out.println(alpha + " " + r + " " + g + " " + b);
-////                img.setRGB(i, j, newrgb);
-////                System.out.println("New Rgb is: " + ((newrgb >> 24) & 0xFF)  + " " + ((newrgb >> 16) & 0xFF) + " " + g + " " + b);
-//        	}
-//        }
-        
-        
+		}        
 
 	}
 	
@@ -217,29 +185,32 @@ public class Stegonography {
 	private static Byte decode_rgb (int alpha, int r, int g, int b, boolean upper, Byte buffer)
 	{
 		if (upper){
-			if ((alpha %2) == 0) 	buffer = (byte) (buffer | (1 << 7));
+			if ((alpha %2) == 1) 	buffer = (byte) (buffer | (0 << 7));
 			else	buffer = (byte) (buffer | (0 << 7));
 			
-			if ((r %2) == 0) 	buffer = (byte) (buffer | (1 << 6));
+			if ((r %2) == 1) 	buffer = (byte) (buffer | (1 << 6));
 			else	buffer = (byte) (buffer | (0 << 6));
 			
-			if ((g %2) == 0) 	buffer = (byte) (buffer | (1 << 5));
+			if ((g %2) == 1) 	buffer = (byte) (buffer | (1 << 5));
 			else	buffer = (byte) (buffer | (0 << 5));
 			
-			if ((b %2) == 0) 	buffer = (byte) (buffer | (1 << 4));
+			if ((b %2) == 1) 	buffer = (byte) (buffer | (1 << 4));
 			else	buffer = (byte) (buffer | (0 << 4));
+//			System.out.println("Upper buffer: " + buffer);
 		}else{
-			if ((alpha %2) == 0) 	buffer = (byte) (buffer | (1 << 3));
+			
+			if ((alpha %2) == 1) 	buffer = (byte) (buffer | (1 << 3));
 			else	buffer = (byte) (buffer | (0 << 3));
 			
-			if ((r %2) == 0) 	buffer = (byte) (buffer | (1 << 2));
+			if ((r %2) == 1) 	buffer = (byte) (buffer | (1 << 2));
 			else	buffer = (byte) (buffer | (0 << 2));
 			
-			if ((g %2) == 0) 	buffer = (byte) (buffer | (1 << 1));
+			if ((g %2) == 1) 	buffer = (byte) (buffer | (1 << 1));
 			else	buffer = (byte) (buffer | (0 << 1));
 			
-			if ((b %2) == 0) 	buffer = (byte) (buffer | (1 << 0));
-			else	buffer = (byte) (buffer | (0 << 0));
+			if ((b %2) == 1) 	buffer = (byte) (buffer | 1);
+			else	buffer = (byte) (buffer | 0);
+//			System.out.println("Lower buffer: " + (buffer & 0x7F));
 		}
 		return buffer;
 	}
@@ -256,8 +227,10 @@ public class Stegonography {
 		int current_byte = 0;
 			
 		while((current_byte = is.read()) != -1){
+//			System.out.print(current_byte + " ");
 			byte a = (byte) ((current_byte >> 4) & 0xF);
 			byte b = (byte) (current_byte & 0xF);
+//			System.out.println(a + " " + b);
 			x.add(a); x.add(b);
 		}
 		return x;	
@@ -269,7 +242,7 @@ public class Stegonography {
 		byte three = (byte) ((by.byteValue() >> 1) & 0x1);
 		byte four = (byte) ((by.byteValue() >> 0) & 0x1);
 		
-		if(((byte)alpha % 2) != one){
+		if((byte)(alpha % 2) != one){
 			if(alpha == 0) alpha+=1;
 			else	alpha-=1;
 		}
