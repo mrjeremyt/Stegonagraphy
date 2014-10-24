@@ -1,5 +1,6 @@
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,17 +142,19 @@ public class Stegonography {
 			FileOutputStream fs = new FileOutputStream(output_file);
 			boolean upper = true;
 			Byte buffer = 0;
+			ColorModel c = img.getColorModel();
+			
 			
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
 	        	for(int j = 0; j < height; j++){
-	        		int pixel = img.getRGB(i, j);
+	        		int pixel = img.getRGB(i, j, true);
 	        		print_rgb(pixel, true);
-	                int alpha = (pixel >> 24) & 0xFF;
-	                int r = (pixel >> 16) & 0xFF;
-	                int g = (pixel >> 8) & 0xFF;
-	                int b = pixel & 0xFF;
+//	                int alpha = (pixel >> 24) & 0xFF;
+//	                int r = (pixel >> 16) & 0xFF;
+//	                int g = (pixel >> 8) & 0xFF;
+//	                int b = pixel & 0xFF;
 	                
 	                if(upper){
 	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
