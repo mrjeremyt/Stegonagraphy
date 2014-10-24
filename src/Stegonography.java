@@ -163,10 +163,10 @@ public class Stegonography {
 	        		WritableRaster raster = null;
 	        		ColorModel colorModel = null;
 
-	        		Object rgbElem = raster.getDataElements(i, j, null);
-	        		int alpha = colorModel.getAlpha(rgbElem);
+//	        		Object rgbElem = raster.getDataElements(i, j, null);
+//	        		int alpha = colorModel.getAlpha(rgbElem);
 	        		Color c = new Color(img.getRGB(i, j), true);
-//	        		int alpha = (img.getRGB(i, j) & 0xff000000) >>> 24;
+	        		int alpha = (img.getRGB(i, j) & 0xff000000) >>> 24;
 	        		int r = c.getRed();
 	        		int g = c.getGreen();
 	        		int b = c.getBlue();
@@ -264,8 +264,8 @@ public class Stegonography {
 		byte four = (byte) ((by.byteValue() >> 0) & 0x1);
 		
 		if((byte)(alpha % 2) != one){
-			if(alpha == 0) alpha=0;
-			else	alpha=0;
+			if(alpha == 0) alpha+=1;
+			else	alpha-=1;
 		}
 			
 		if((byte)(r % 2) != two){
