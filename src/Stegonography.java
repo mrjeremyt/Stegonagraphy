@@ -74,11 +74,11 @@ public class Stegonography {
 	                
 	        		if(it.hasNext())
 	        		{
-	        			print_rgb(pixel, true);
+//	        			print_rgb(pixel, true);
 	        			byte test_byte = it.next();
-//	        			System.out.println(Integer.toBinaryString((test_byte & 0xFF) + 0x10).substring(1)); //Converts byte to binary string.
+	        			System.out.println(Integer.toBinaryString((test_byte & 0xFF) + 0x10).substring(1)); //Converts byte to binary string.
 		                int newrgb = newrgb(r, g, b, test_byte);
-		                print_rgb(newrgb, false);
+//		                print_rgb(newrgb, false);
 		                
 		                temp.setRGB(i, j, newrgb);
 	        		}
@@ -124,52 +124,46 @@ public class Stegonography {
 	        	}
 	        }
 //			System.out.println("Wtf is this alpha crap?  Do you even haz one bro? Answer: " + cm.hasAlpha());
-	        ImageIO.write(temp, img_info[1].toString(), output_file);     
+	        ImageIO.write(temp, img_info[1].toString(), output_file);
 		}else{
 			File output_file = new File(Paths.get(args[2]).getFileName().toString() + "-out");
 			FileOutputStream fs = new FileOutputStream(output_file);
-			boolean upper = true;
 			Byte buffer = 0;
-			
-			
-			
+			int current_iter = 0;
+
 			outerloop:
 	        for(int i = 0; i < width; i++){
-	        	for(int j = 0; j < height; j++){
-//	        		int pixel = img.getRGB(i, j);
-//	        		print_rgb(pixel, true);
-//	                int alpha = (pixel >> 24) & 0xFF;
-//	                int r = (pixel >> 16) & 0xFF;
-//	                int g = (pixel >> 8) & 0xFF;
-//	                int b = pixel & 0xFF;
-	        		
-	        		WritableRaster raster = null;
-	        		ColorModel colorModel = null;
-
-//	        		Object rgbElem = raster.getDataElements(i, j, null);
-//	        		int alpha = colorModel.getAlpha(rgbElem);
-	        		Color c = new Color(img.getRGB(i, j), true);
-	        		int alpha = (img.getRGB(i, j) & 0xff000000) >>> 24;
-	        		int r = c.getRed();
-	        		int g = c.getGreen();
-	        		int b = c.getBlue();
-	        		System.out.println("Alpha is: " + alpha);
-
-	        		
-	                
-	                if(upper){
-	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
+	        	for(int j = 0; j < height; j++)
+	        	{
+//	        		Color c = new Color(img.getRGB(i, j), true);
+//	        		int r = c.getRed();
+//	        		int g = c.getGreen();
+//	        		int b = c.getBlue();
+	        			                
+	                if(current_iter < 3)
+	                {
+		        		Color c = new Color(img.getRGB(i, j), true);
+		        		int r = c.getRed();
+		        		int g = c.getGreen();
+		        		int b = c.getBlue();
+		        		print_rgb(img.getRGB(i, j), false);
+	                	buffer = decode_rgb(r, g, b, current_iter, buffer);
 	                	System.out.println("Upper buffer: " + buffer);
-	                	upper = false;
-	                }else{
-	                	buffer = decode_rgb(alpha, r, g, b, upper, buffer);
+	                	current_iter++;
+	                }
+	                else
+	                {
+	                	j--;
+	                	current_iter = 0;
+//	                	buffer = decode_rgb(r, g, b, current_iter, buffer);
 	                	System.out.println("Full Buffer: " + buffer);
-	                	upper = true;
-	                	if(buffer.byteValue() != 0){
+	                	if(buffer.byteValue() != 0)
+	                	{
 	                		fs.write(new byte[]{buffer.byteValue()});
 //	                		System.out.println("Final buffer to write: " + Byte.toString(buffer));
 	                		buffer = 0;
-	                	}else  		break outerloop;
+	                	}
+	                	else  		break outerloop;
 	                }
 	        	}
 	        }
@@ -186,35 +180,42 @@ public class Stegonography {
 			System.out.println("New Rgb is: " + " " + ((rgb >> 16) & 0xFF) + " " + ((rgb >> 8) & 0xFF) + " " + (rgb & 0xFF));
 	}
 	
-	private static Byte decode_rgb (int alpha, int r, int g, int b, boolean upper, Byte buffer)
+	private static Byte decode_rgb (int r, int g, int b, int pos, Byte buffer) // pos = 0 means highest. 2 = lowest.
 	{
-		if (upper){
-			if ((alpha %2) == 1) 	buffer = (byte) (buffer | (0 << 7));
+		if (pos == 0)
+		{
+			if ((g %2) == 1) 	buffer = (byte) (buffer | (0 << 7));
 			else	buffer = (byte) (buffer | (0 << 7));
 			
-			if ((r %2) == 1) 	buffer = (byte) (buffer | (1 << 6));
+			if ((b %2) == 1) 	buffer = (byte) (buffer | (1 << 6));
 			else	buffer = (byte) (buffer | (0 << 6));
-			
-			if ((g %2) == 1) 	buffer = (byte) (buffer | (1 << 5));
+//			System.out.println("Upper buffer: " + buffer);
+		}
+		else if (pos == 1){			
+			if ((r %2) == 1) 	buffer = (byte) (buffer | (1 << 5));
 			else	buffer = (byte) (buffer | (0 << 5));
 			
-			if ((b %2) == 1) 	buffer = (byte) (buffer | (1 << 4));
+			if ((g %2) == 1) 	buffer = (byte) (buffer | (1 << 4));
 			else	buffer = (byte) (buffer | (0 << 4));
-//			System.out.println("Upper buffer: " + buffer);
-		}else{
 			
-			if ((alpha %2) == 1) 	buffer = (byte) (buffer | (1 << 3));
+			if ((b %2) == 1) 	buffer = (byte) (buffer | (1 << 3));
 			else	buffer = (byte) (buffer | (0 << 3));
-			
+//			System.out.println("Lower buffer: " + (buffer & 0x7F));
+		}
+		else if (pos == 2)
+		{
 			if ((r %2) == 1) 	buffer = (byte) (buffer | (1 << 2));
 			else	buffer = (byte) (buffer | (0 << 2));
 			
 			if ((g %2) == 1) 	buffer = (byte) (buffer | (1 << 1));
 			else	buffer = (byte) (buffer | (0 << 1));
 			
-			if ((b %2) == 1) 	buffer = (byte) (buffer | 1);
-			else	buffer = (byte) (buffer | 0);
-//			System.out.println("Lower buffer: " + (buffer & 0x7F));
+			if ((b %2) == 1) 	buffer = (byte) (buffer | (1));
+			else	buffer = (byte) (buffer | (0));
+		}
+		else{
+			System.err.println("Oh crap, something went horrible wrong...All is doom!");
+			System.exit(-42); //OMGERZ you broke it!
 		}
 		return buffer;
 	}
@@ -230,16 +231,17 @@ public class Stegonography {
 			
 		while((current_byte = is.read()) != -1){
 //			System.out.print(current_byte + " ");
-			byte a = (byte) ((current_byte >> 6) & 0x3);
+			byte a = (byte) ((current_byte >> 6) & 0x1);
 			byte b = (byte) ((current_byte >> 3) & 0x7);
 			byte c = (byte) (current_byte & 0x7);
-//			System.out.println(a + " " + b);
+//			System.out.println(a + " " + b + " " + c);
 			x.add(a); x.add(b); x.add(c);
 		}
 		return x;	
 	}
 	
 	private static int newrgb(int r, int g, int b, Byte by){
+		System.out.println(by);
 		byte one= (byte) ((by.byteValue() >> 2) & 0x1);
 		byte two = (byte) ((by.byteValue() >> 1) & 0x1);
 		byte three = (byte) ((by.byteValue() >> 0) & 0x1);
