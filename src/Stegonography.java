@@ -216,22 +216,39 @@ public class Stegonography {
 	
 
 	private static boolean enough_bits (ByteArrayInputStream is)
-	{		return ((is.available() + 1) <= ((height * width * 3) / 8));  	}  // Abandon all hope, ye who try to understand this code.
+	{		return ((is.available() + 1) <= ((height * width ) / 3));  	}  // Abandon all hope, ye who try to understand this code.
 	
 	
 	private static LinkedList<Byte> full_of_byte(ByteArrayInputStream is){
 		LinkedList<Byte> x = new LinkedList<Byte>();
+		
 		int current_byte = 0;
+		
+		if(enough_bits(is)){
+			while((current_byte = is.read()) != -1){
+				byte a = (byte) ((current_byte >> 6) & 0x1);
+				byte b = (byte) ((current_byte >> 3) & 0x7);
+				byte c = (byte) (current_byte & 0x7);
+				x.add(a); x.add(b); x.add(c);
+			}
+			return x;	
+		}else{
+			int num_bytes_can_write = ((height * width) / 3) - 1;
+			int num_bytes_written = 0;
 			
-		while((current_byte = is.read()) != -1){
-//			System.out.print(current_byte + " ");
-			byte a = (byte) ((current_byte >> 6) & 0x1);
-			byte b = (byte) ((current_byte >> 3) & 0x7);
-			byte c = (byte) (current_byte & 0x7);
-//			System.out.println(a + " " + b + " " + c);
-			x.add(a); x.add(b); x.add(c);
+			while(num_bytes_written <= num_bytes_can_write){
+				current_byte = is.read();
+				byte a = (byte) ((current_byte >> 6) & 0x1);
+				byte b = (byte) ((current_byte >> 3) & 0x7);
+				byte c = (byte) (current_byte & 0x7);
+				x.add(a); x.add(b); x.add(c);
+				num_bytes_written++;
+				System.out.println("Error: Message is larger than the image. Message has been truncated.");
+			}
+			return x;
 		}
-		return x;	
+		
+
 	}
 	
 	private static int newrgb(int r, int g, int b, Byte by){
