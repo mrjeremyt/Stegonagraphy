@@ -52,6 +52,8 @@ public class Stegonography {
 			ByteArrayInputStream is = new ByteArrayInputStream(data);
 			
 			String img_info[] = Paths.get(args[1]).getFileName().toString().split("\\.");
+			if (img_info[1].equals("jpeg") || img_info[1].equals("jpg"))
+				img_info[1] = "bmp";
 			String out_img_name = img_info[0] + "-steg." + img_info[1]; 
 			File output_file = new File(out_img_name);
 			
@@ -62,7 +64,7 @@ public class Stegonography {
 			boolean do_one_more = false;
 			boolean upper = true;
 			int when_to_write = 0;
-
+			int num_times_for_zero = 0;
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
@@ -82,43 +84,17 @@ public class Stegonography {
 		                
 		                temp.setRGB(i, j, newrgb);
 	        		}
-	        		else{
-	        			if(do_one_more){        					
-	        				if((byte)(r % 2) != 0){
-	        					if(r == 0)	r+=1;
-	        					else r-=1;
-	        				}
-	        					
-	        				if((byte)(g % 2) != 0){
-	        					if(g == 0) 	g+=1;
-	        					else	g-=1;
-	        				}
-	        						
-	        				if((byte)(b % 2) != 0){
-	        					if(b == 0) 	b+=1;
-	        					else b-=1;
-	        				}
-	        				
-	        				break outerloop;
-	        			}else{	        					
-	        				if((byte)(r % 2) != 0){
-	        					if(r == 0)	r+=1;
-	        					else r-=1;
-	        				}
-	        					
-	        				if((byte)(g % 2) != 0){
-	        					if(g == 0) 	g+=1;
-	        					else	g-=1;
-	        				}
-	        						
-	        				if((byte)(b % 2) != 0){
-	        					if(b == 0) 	b+=1;
-	        					else b-=1;
-	        				}
-	        				
-	        				do_one_more = true;
-	        			}
-	        			
+	        		else
+	        		{
+        				if (num_times_for_zero < 3)
+        				{
+        					int rgbnew = write_eof(r, g, b);
+        					temp.setRGB(i,j,rgbnew);
+        					num_times_for_zero++;
+        					continue;
+        				}
+        				else
+        					break outerloop;
 	        		}
 
 	        	}
@@ -170,6 +146,24 @@ public class Stegonography {
 	        fs.close();
 		}        
 
+	}
+	
+	private static int write_eof (int r, int g, int b)
+	{
+		if ((r % 2) == 1){
+			r-=1;
+		}
+		if ((g % 2) == 1){
+			g-=1;
+		}
+		if ((b % 2) == 1){
+			b-=1;
+		}
+		int newrgb = 0;
+		newrgb = (b | newrgb);
+		newrgb = (g << 8) | newrgb;
+		newrgb = (r << 16) | newrgb;
+		return newrgb;
 	}
 	
 	private static void print_rgb (int rgb, boolean old)
