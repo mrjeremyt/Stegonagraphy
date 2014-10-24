@@ -68,6 +68,7 @@ public class Stegonography {
 			boolean do_one_more = false;
 			boolean upper = true;
 			ColorModel cm = img.getColorModel();
+			System.out.println("OMGERZ!");
 			
 			outerloop:
 	        for(int i = 0; i < width; i++){
