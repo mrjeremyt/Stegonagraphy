@@ -28,6 +28,7 @@ of your choice and it will always be encoded in a format that will preserve the 
 Young said that if we got jpeg to work that would count as extra credit, so I'm going to add this here because I'm not sure where else to 
 put it. 
 
+
 [Test Cases]
 (Otherwise known as the questions of the 5th degree)
 
